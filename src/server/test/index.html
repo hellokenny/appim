@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/login.js"></script>
+    <script src="./js/libs/jquery-3.1.1.min.js"></script>
+    <script>
+
+
+        var socket =io('http://10.101.132.67:8989/appim');
+
+        function loginTest() {
+//            login();
+
+            var ac=$("#ac").val();
+            var name=$("#name").val();
+            var avatar=$("#avatar").val();
+
+
+            socket.on('news',function (data) {
+                console.log(data);
+                console.log(socket);
+            });
+
+            socket.on('socketerror',function (data) {
+                console.log('socketerror');
+                console.log(data);
+            });
+
+            socket.emit('loginTest',{
+                ac:ac,
+                name:name,
+                avatar:avatar
+            })
+        }
+
+//        socket.on('news',function (data) {
+//            console.log(data);
+//            socket.emit('my other event',{my:'data'});
+//        })
+
+    </script>
+</head>
+<body>
+    <label>Account:</label>
+    <input type="text" name="ac" id="ac" >
+    <br/>
+    <label>Name:</label>
+    <input type="text" name="name" id="name" >
+    <br/>
+    <label>Avatar:</label>
+    <input type="text" name="avatar" id="avatar" >
+    <br/>
+    <input type="button" onclick="loginTest()" value="Login">
+</body>
+</html>
