@@ -6,13 +6,13 @@ var router = express.Router();
 var Const = require("../const");
 
 
-var LoginHandler = function(){
+var UserHandler = function(){
 
 }
 
-_.extend(LoginHandler.prototype,RequestHandlerBase.prototype);
+_.extend(UserHandler.prototype,RequestHandlerBase.prototype);
 
-LoginHandler.prototype.attach = function(router){
+UserHandler.prototype.attach = function(router){
 
     var self = this;
 
@@ -49,12 +49,13 @@ LoginHandler.prototype.attach = function(router){
      }
 
      */
-    router.post('/',function(request,response){
+    router.post('/login',function(request,response){
 
         UserLogic.login(request.body,function(result){
 
             self.successResponse(response,Const.responsecodeSucceed,{
-                user: result.user
+                user: result.user,
+                msgs: result.msgs
             });
 
         },function(err,code){
@@ -78,5 +79,5 @@ LoginHandler.prototype.attach = function(router){
 
 }
 
-new LoginHandler().attach(router);
+new UserHandler().attach(router);
 module["exports"] = router;

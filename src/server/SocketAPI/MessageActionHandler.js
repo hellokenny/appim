@@ -82,7 +82,7 @@ LoginActionHandler.prototype.attach = function(io,socket){
                             if(_.isUndefined(RoomsManager.rooms[room._id])){
                                 RoomsManager.addRoom(room._id,room.name,room.ownerId,room.members,room.members);
                             }
-                            RoomsManager.enterRoom(room._id,user._id);
+                            RoomsManager.enterRoom(room._id,user._id.toString());
 
                         });
                     }
