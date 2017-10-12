@@ -4,105 +4,107 @@ var Settings = require("../lib/Settings");
 var UserModel = require("../Models/UserModel");
 var MessageModel = require("../Models/MessageModel");
 var DatabaseManager = require("../lib/DatabaseManager");
+var UsersManager = require('./UsersManager');
+var RoomManager = require('./RoomsManager');
 var async = require('async');
 var _ = require('lodash');
+var moment = require('moment');
 
-var UserLogic = {
-    login : function(param,onSuccess,onError){
-        var ac = param.ac;
+var RoomLogic = {
+    add : function(param,onSuccess,onError){
+        console.log("---------------RoomLogic add-------------");
+        console.log(param);
+
         var name = param.name;
-        var avatar = param.avatar;
-        var startTime = param.startTime;
-
-        if(Utils.isEmpty(ac)){
-
-            if(onError)
-                onError(null,Const.resCodeLoginNoAc);
-
-            return;
-
-        }
+        var members = param.members;
+        var arrMembers = [];
+        var ownerId = param.ownerId;
 
         if(Utils.isEmpty(name)){
 
             if(onError)
-                onError(null,Const.resCodeLoginNoName);
+                onError(null,Const.resCodeParamError);
 
             return;
 
         }
 
-        if(Utils.isEmpty(avatar)){
-            avatar = Settings.options.noAvatarImg;
+        if(Utils.isEmpty(members)){
+
+            if(onError)
+                onError(null,Const.resCodeParamError);
+
+            return;
+
         }
 
-        async.waterfall([
-            function (done) {
-                //获取用户信息
-                UserModel.findByAc(ac,function (err,user) {
-                    done(err,user);
-                })
-            },
-            function (user,done) {
-                if(user == null){
-                    // save to database
-                    var newUser = new DatabaseManager.userModel({
-                        ac:ac,
-                        name:name,
-                        avatar:avatar,
-                        createTime:Date.now()
-                    });
-                    newUser.save(function (err,user) {
-                        done(err,user);
-                    });
-                }
-                else{
-                    user.update({
-                        name:name,
-                        avatar:avatar
-                    },{},function (err,userResult) {
-                        done(err,user);
-                    })
-                }
-            },
-            function (user,done) {
-                // 获取用户未读消息
-                MessageModel.findUnreceivedByUerId(startTime,user._id,function (err,msgs) {
-                    done(err,user,msgs);
+        arrMembers = members.split(',');
+
+        if(Utils.isEmpty(ownerId)){
+
+            if(onError)
+                onError(null,Const.resCodeParamError);
+
+            return;
+
+        }
+
+        var newRoom = new DatabaseManager.roomModel({
+            name : name,
+            members : arrMembers,
+            ownerId : ownerId,
+            createTime : new Date()
+        });
+
+        newRoom.save(function (err,room) {
+            if(err){
+
+                if(onError)
+                    onError(err,null);
+
+            }else{
+
+
+                console.log("---------------[RoomLogic]dbreturnroom-------------")
+
+                console.log(room);
+
+                RoomManager.addRoom(room._id,room.name,room.ownerId,room.members,room.members);
+
+                //将房间内的人员加入socket分组
+                arrMembers.forEach(function (uId) {
+
+                    console.log("---------------[RoomLogic]newRoomSave-------------")
+
+                    console.log(uId);
+                    var user = UsersManager.users[uId];
+                    if(user!=null){
+
+                        console.log("---------------[RoomLogic]newRoom-------------")
+
+                        console.log(newRoom);
+
+                        console.log("---------------[RoomLogic]room-------------")
+
+                        console.log(room);
+
+                        user.socket.join(room._id.toString());
+                        RoomManager.enterRoom(room._id.toString(),uId);
+                    }
+
                 });
-            },
-            function (user,msgs) {
-                //更新消息未读用户信息
-                msgs.forEach(function (msg) {
-                    var arr = msg.unreceiveds.slice(0);
-                    _.pull(arr,user._id.toString());
-                    msg.update({
-                        unreceiveds:arr
-                    },{},function (err,data) {
-                        console.log(err);
-                        console.log(data);
-                    });
-                });
+
+
+
 
                 if(onSuccess)
                     onSuccess({
-                        user: user,
-                        msgs: msgs
+                        room: room
                     });
             }
-
-        ],
-            function (err,data) {
-                if(err){
-                    socket.emit('socketerror',{code:Const.responsecodeFail});
-                }
-                else{
-                    socket.emit('socketerror',data);
-                }
-            }
-        );
+        });
 
     }
 }
 
-module["exports"] = UserLogic;
+module["exports"] = RoomLogic;

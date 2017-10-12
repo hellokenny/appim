@@ -3,12 +3,12 @@ var _ = require('lodash');
 var UsersManager = {
 
     rooms:{},
-    addRoom:function (rid,name,ownId,members,offlines) {
+    addRoom:function (rId,name,ownerId,members,offlines) {
 
         var room = {
-            roomId: rid,
+            roomId: rId,
             name: name,
-            ownId: ownId,
+            ownerId: ownerId,
             members: members.slice(0),
             offlines:offlines.slice(0)
         };
@@ -18,49 +18,70 @@ var UsersManager = {
             this.rooms = {};
         }
 
-        if(_.isUndefined(this.rooms[rid])){
-            this.rooms[rid] = {};
+        if(_.isUndefined(this.rooms[rId])){
+            this.rooms[rId] = {};
         }
 
-        this.rooms[rid] = room;
+        this.rooms[rId] = room;
+
+        console.log("---------------addRoom-------------")
+
+        console.log(this.rooms);
     },
     
-    removeRoom: function(rid){
+    removeRoom: function(rId){
 
-        delete this.rooms[rid];
+        delete this.rooms[rId];
 
-    },
-
-    addUser:function (rid,uid) {
-        if(_.isUndefined(this.rooms[rid])){
-            this.rooms[rid] = {};
-        }
-        if(_.isUndefined(this.rooms[rid].members)){
-            this.rooms[rid].members = [];
-        }
-        this.rooms[rid].members.push(uid);
-    },
-
-    removeUser:function (rid,uid) {
-        _.pull(this.rooms[rid].members,uid);
-        _.pull(this.rooms[rid].offlines,uid);
-    },
-
-    enterRoom: function(rid,uid){
-
-        _.pull(this.rooms[rid].offlines,uid);
+        console.log(this.rooms);
 
     },
 
-    leaveRoom: function(rid,uid){
+    addUser:function (rId,uId) {
+        if(_.isUndefined(this.rooms[rId])){
+            this.rooms[rId] = {};
+        }
+        if(_.isUndefined(this.rooms[rId].members)){
+            this.rooms[rId].members = [];
+        }
+        this.rooms[rId].members.push(uId);
 
-        if(_.isUndefined(this.rooms[rid])){
-            this.rooms[rid] = {};
+        console.log("---------------addUser-------------");
+
+        console.log(this.rooms);
+    },
+
+    removeUser:function (rId,uId) {
+        _.pull(this.rooms[rId].members,uId.toString());
+        _.pull(this.rooms[rId].offlines,uId.toString());
+
+        console.log(this.rooms);
+    },
+
+    enterRoom: function(rId,uId){
+
+        _.pull(this.rooms[rId].offlines,uId.toString());
+
+        console.log("---------------enterRoom-------------");
+
+        console.log(this.rooms);
+
+    },
+
+    leaveRoom: function(rId,uId){
+
+        if(_.isUndefined(this.rooms[rId])){
+            this.rooms[rId] = {};
         }
-        if(_.isUndefined(this.rooms[rid].offlines)){
-            this.rooms[rid].offlines = [];
+        if(_.isUndefined(this.rooms[rId].offlines)){
+            this.rooms[rId].offlines = [];
         }
-        this.rooms[rid].offlines.push(uid);
+        this.rooms[rId].offlines.push(uId);
+
+
+        console.log("---------------leaveRoom-------------");
+
+        console.log(this.rooms);
 
     }
 

@@ -10,13 +10,13 @@ var RoomModel = require("../Models/RoomModel");
 var Settings = require("../lib/Settings");
 var async = require('async');
 
-var LoginActionHandler = function(){
+var UserActionHandler = function(){
 
 }
 
-_.extend(LoginActionHandler.prototype,SocketHandlerBase.prototype);
+_.extend(UserActionHandler.prototype,SocketHandlerBase.prototype);
 
-LoginActionHandler.prototype.attach = function(io,socket){
+UserActionHandler.prototype.attach = function(io,socket){
 
     var self = this;
 
@@ -31,7 +31,7 @@ LoginActionHandler.prototype.attach = function(io,socket){
     socket.on('login', function(param){
 
         if(Utils.isEmpty(param.ac)){
-            socket.emit('socketerror', {code:Const.resCodeSocketLoginNoUserID});
+            socket.emit('socketerror', {code:Const.resCodeParamError});
             return;
         }
 
@@ -59,7 +59,7 @@ LoginActionHandler.prototype.attach = function(io,socket){
                         //获取用户所属房间信息
                         RoomModel.findByUserId(user._id,function (err,rooms) {
                             done(err,user,rooms);
-                        })
+                        });
 
                     }
                 },
@@ -77,7 +77,7 @@ LoginActionHandler.prototype.attach = function(io,socket){
 
                             socket.join(strRoomId);
 
-                            io.of(Settings.options.socketNameSpace).to(strRoomId).emit('news', param);
+                            io.of(Settings.options.socketNameSpace).to(strRoomId).emit('news', {code:Const.resCodeSucceed,data:{user:user,room:room}});
 
                             if(_.isUndefined(RoomsManager.rooms[room._id])){
                                 RoomsManager.addRoom(room._id,room.name,room.ownerId,room.members,room.members);
@@ -94,7 +94,7 @@ LoginActionHandler.prototype.attach = function(io,socket){
 
                 if(err){
 
-                    socket.emit('socketerror', {code:Const.resCodeSocketLoginNoUserID});
+                    socket.emit('socketerror', {code:Const.resCodeFail});
 
                 }else{
 
@@ -108,7 +108,43 @@ LoginActionHandler.prototype.attach = function(io,socket){
 
     });
 
+
+    socket.on('logout', function(param){
+
+        if(Utils.isEmpty(param.uId)){
+            socket.emit('socketerror', {code:Const.resCodeParamError});
+            return;
+        }
+
+        UsersManager.removeUser(param.uId);
+
+        RoomModel.findByUserId(param.uId,function (err,rooms) {
+            if(err)
+                socket.emit('socketerror',{code:Const.resCodeFail});
+
+            //离开房间分组
+            if(rooms != null && rooms.length>0){
+
+                rooms.forEach(function (room) {
+
+                    var objRoomId = room._id;
+                    var strRoomId=objRoomId.toString();
+
+                    socket.leave(strRoomId);
+
+                    io.of(Settings.options.socketNameSpace).to(strRoomId).emit('news', {code:Const.resCodeSucceed,data:{uId:param.uId,room:room}});
+
+                    RoomsManager.leaveRoom(room._id,param.uId);
+
+                });
+            }
+
+        })
+
+
+    });
+
 }
 
 
-module["exports"] = new LoginActionHandler();
+module["exports"] = new UserActionHandler();

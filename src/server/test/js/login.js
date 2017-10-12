@@ -6,32 +6,29 @@ function login() {
     var ac=$("#ac").val();
     var name=$("#name").val();
     var avatar=$("#avatar").val();
+    var startTime=$("#startTime").val();
     $.ajax({
         type : "POST",
         url : "http://10.101.132.67:8989/appim/user/login",
-        data : JSON.stringify({ac: ac, name: name, avatar: avatar}),
+        data : JSON.stringify({ac: ac, name: name, avatar: avatar,startTime:startTime}),
         dataType: 'json',
         contentType: "application/json; charset=UTF-8",
         headers: {},
         success: function (response) {
-
-            // socketIOManager.emit('login',{
-            //     ac:ac,
-            //     name:name,
-            //     avatar:avatar
-            // });
 
             var errorCode = response.code;
 
             // server handled error
             if(errorCode != 1){
 
-                alert('fail');
+                // alert('fail');
+                console.log('fail');
             }
 
             if(errorCode == 1){
 
-                alert(response.data);
+                console.log('http login success');
+                console.log(response.data);
 
             }
 
@@ -43,8 +40,8 @@ function login() {
         },
         error: function (e) {
 
-            alert('err1');
-            alert(e);
+            console.log('err1');
+            console.log(e);
 
         }
     });

@@ -1,30 +1,27 @@
 var _ = require('lodash');
 var RequestHandlerBase = require("./RequestHandlerBase");
-var UserLogic = require("../Logics/UserLogic");
+var MessageLogic = require("../Logics/MessageLogic");
 var express = require('express');
 var router = express.Router();
 var Const = require("../const");
 
 
-var UserHandler = function(){
+var MessageHandler = function(){
 
 }
 
-_.extend(UserHandler.prototype,RequestHandlerBase.prototype);
+_.extend(MessageHandler.prototype,RequestHandlerBase.prototype);
 
-UserHandler.prototype.attach = function(router){
+MessageHandler.prototype.attach = function(router){
 
     var self = this;
 
-    // {post} /user/login
-    router.post('/login',function(request,response){
+    // {post} /message/send
+    router.post('/send',function(request,response){
 
-        UserLogic.login(request.body,function(result){
+        MessageLogic.send(request.body,function(result){
 
-            self.successResponse(response,Const.responsecodeSucceed,{
-                user: result.user,
-                msgs: result.msgs
-            });
+            self.successResponse(response,Const.resCodeSucceed,null);
 
         },function(err,code){
 
@@ -47,5 +44,5 @@ UserHandler.prototype.attach = function(router){
 
 }
 
-new UserHandler().attach(router);
+new MessageHandler().attach(router);
 module["exports"] = router;

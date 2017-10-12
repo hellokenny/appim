@@ -1,13 +1,41 @@
 var _ = require('lodash');
 var UsersManager = require("./Logics/UsersManager");
 var RoomsManager = require("./Logics/RoomsManager");
-var DatabaseManager = require("./lib/DatabaseManager");
-var Utils = require("./lib/Utils");
-var Const = require("./const");
-var UserModel = require("./Models/UserModel");
-var RoomModel = require("./Models/RoomModel");
-var Settings = require("./lib/Settings");
-var async = require('async');
+var moment = require('moment');
+
+var MessageModel = require("./Models/MessageModel");
+var Settings = require('./lib/Settings');
+var DatabaseManager = require('./lib/DatabaseManager');
+DatabaseManager.init(Settings.options);
+
+var objectid = require('objectid');
+
+var id =objectid();
+
+var idstr = id.toString();
+
+var idstr1 = idstr.toString();
+
+var t = '111';
+
+var tt = t.toString();
+
+// console.log(objectid());
+// console.log(objectid());
+// console.log(objectid());
+
+
+// var st1 = '2017-09-27 10:08:28';
+//
+// var std = '2017-09-27 10:08:28';
+//
+// var dt1 = new Date('2017-09-27 10:08:28') ;
+//
+// var dtutc = moment(dt1).utc();
+//
+// var dtutcformat = moment(dt1).utc().format();
+//
+// var uId='59c0c092eab58e61f8730d6e';
 
 // var ps ={}
 //
@@ -90,12 +118,12 @@ var async = require('async');
 // var u3 = _.findIndex(users, 'active');
 // // => 2
 
-var users = [
-    { 'user': 'barney',  'active': false },
-    { 'user': 'fred',    'active': false },
-    { 'user': 'pebbles', 'active': true },
-    { 'user': 'kenny', 'active': false }
-];
+// var users = [
+//     { 'user': 'barney',  'active': false },
+//     { 'user': 'fred',    'active': false },
+//     { 'user': 'pebbles', 'active': true },
+//     { 'user': 'kenny', 'active': false }
+// ];
 
 // var t0 = _.findIndex(users, function(o) { return o.user == 'barney'; });
 // // => 0
@@ -112,18 +140,18 @@ var users = [
 // var t4 = _.findIndex(users, ['user', 'kenny']);
 // // => 2
 
-// The `_.matches` iteratee shorthand.
-var t1 = _.findIndex(users, { 'user': 'fred', 'active': false });
-// => 1
-
-var t5 = _.indexOf(users,{ 'user': 'fred', 'active': false });
-
-var arr=["59c0bb3189b1c15c9aa9cfba","59c0bcc4eab58e61f8730d6d","59c0bcc4eab58e61f8730d6d"];
-var a="59c0bcc4eab58e61f8730d6d";
-
-var t11 = _.findIndex(arr, a);
-
-var t13 = _.indexOf(arr,a);
+// // The `_.matches` iteratee shorthand.
+// var t1 = _.findIndex(users, { 'user': 'fred', 'active': false });
+// // => 1
+//
+// var t5 = _.indexOf(users,{ 'user': 'fred', 'active': false });
+//
+// var arr=["59c0bb3189b1c15c9aa9cfba","59c0bcc4eab58e61f8730d6d","59c0bcc4eab58e61f8730d6d"];
+// var a="59c0bcc4eab58e61f8730d6d";
+//
+// var t11 = _.findIndex(arr, a);
+//
+// var t13 = _.indexOf(arr,a);
 
 
 

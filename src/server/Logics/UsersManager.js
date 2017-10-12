@@ -4,10 +4,10 @@ var UsersManager = {
 
     users:{},
 
-    addUser: function(uid,name,avatar,socket){
+    addUser: function(uId,name,avatar,socket){
 
         var user = {
-            userId: uid,
+            userId: uId,
             name: name,
             avatar: avatar,
             socket: socket
@@ -17,16 +17,22 @@ var UsersManager = {
             this.users = {};
         }
 
-        if(_.isUndefined(this.users[uid])){
-            this.users[uid] = {};
+        if(_.isUndefined(this.users[uId])){
+            this.users[uId] = {};
         }
 
-        this.users[uid] = user;
+        this.users[uId] = user;
+
+        console.log("---------------[UsersManager]addUser-------------")
+
+        console.log(this.users);
 
     },
-    removeUser: function(uid){
+    removeUser: function(uId){
 
-        delete this.users[uid];
+        delete this.users[uId];
+
+        console.log(this.users);
 
     }
 }

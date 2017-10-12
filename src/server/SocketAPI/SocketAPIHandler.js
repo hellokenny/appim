@@ -13,8 +13,9 @@ var SocketAPIHandler = {
         this.nsp.on('connection', function(socket) {
 
             // require('./DisconnectActionHandler').attach(io,socket);
-            require('./LoginActionHandler').attach(io,socket);
-            // require('./SendMessageActionHandler').attach(io,socket);
+            require('./UserActionHandler').attach(io,socket);
+            require('./MessageActionHandler').attach(io,socket);
+            require('./RoomActionHandler').attach(io,socket);
             // require('./SendTypingActionHandler').attach(io,socket);
             // require('./OpenMessageActionHandler').attach(io,socket);
             // require('./DeleteMessageActionHandler').attach(io,socket);

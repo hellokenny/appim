@@ -11,86 +11,98 @@ var Settings = require("../lib/Settings");
 var async = require('async');
 var objectid = require('objectid');
 
-var MessageActionHandler = function(){
+var RoomActionHandler = function(){
 
 }
 
-_.extend(MessageActionHandler.prototype,SocketHandlerBase.prototype);
+_.extend(RoomActionHandler.prototype,SocketHandlerBase.prototype);
 
-MessageActionHandler.prototype.attach = function(io,socket){
+RoomActionHandler.prototype.attach = function(io,socket){
 
     var self = this;
 
-    socket.on('sendmsg', function(param){
+    socket.on('addmember', function(param){
 
-        var rId = param.rId;
-        var uId = param.uId;
-        var msg = param.msg;
-        var type = param.type;
-
-        console.log('---------------sendmsg param-------------');
+        console.log('addmember');
         console.log(param);
 
-        if(Utils.isEmpty(rId)){
-            socket.emit('socketerror',{code:Const.resCodeParamError});
-            return;
-        }
+        var rId = param.rId;
+        var inviterId = param.inviterId;
+        var invitedIds = param.invitedIds;
+        var arrInvitedIds = [];
 
         if(Utils.isEmpty(rId)){
             socket.emit('socketerror',{code:Const.resCodeParamError});
             return;
         }
 
-        if(Utils.isEmpty(uId)){
+        if(Utils.isEmpty(inviterId)){
             socket.emit('socketerror',{code:Const.resCodeParamError});
             return;
         }
 
-        if(Utils.isEmpty(msg)){
+        if(Utils.isEmpty(invitedIds)){
             socket.emit('socketerror',{code:Const.resCodeParamError});
             return;
         }
 
+        arrInvitedIds = invitedIds.split(',');
 
         async.waterfall([
             function (done) {
                 //获取房间信息
-                var room = RoomsManager.rooms[rId];
-                if(room!=null){
-                    //保存消息数据
-                    var newMessage = new DatabaseManager.messageModel({
-                        _id:objectid(),
-                        message:msg,
-                        type:type,
-                        senderId:uId,
-                        sendTime:new Date(),
-                        roomId:rId,
-                        targets:room.members,
-                        unreceiveds:room.offlines,
-                        createTime:new Date()
-                    });
-
-                    console.log('---------------sendmsg newMessage-------------');
-                    console.log(newMessage);
-
-                    //发送消息
-                    io.of(Settings.options.socketNameSpace).to(rId).emit('news', {code:Const.resCodeSucceed,data:{msg:newMessage}});
-
-                    newMessage.save(function (err,room) {
-                        if(err){
-
-                            console.log("---------------newMessageSave-------------");
-
-                            console.log(err);
-                        }
-                    })
+                RoomModel.model.findById(rId,function (err,room) {
+                    done(err,rId,room);
+                });
+            },
+            function (rId,room,done) {
+                if(Utils.isEmpty(room)){
+                    socket.emit('socketerror',{code:Const.resCodeFail});
+                    return;
                 }
+                else {
+                    //更新db中房间成员信息
+                    room.update({
+                        members:room.members.concat(arrInvitedIds)
+                    },{},function (err,data) {
+                        done(err,rId);
+                    });
+                }
+            },
+            function (rId,done) {
+                //更新内存中房间成员信息，将用户加入socket分组
+                var room = RoomsManager.rooms[rId];
+                if(!Utils.isEmpty(room)){
+                    arrInvitedIds.forEach(function (uId) {
+                        //内存房间中添加成员
+                        RoomsManager.addUser(rId,uId);
+                        var user = UsersManager.users[uId];
+                        if(!Utils.isEmpty(user)){
+                            user.socket.join(rId);
+                        }
+                        else{
+                            //内存房间中添加离线成员
+                            RoomsManager.leaveRoom(rId,uId);
+                        }
+                    });
+                    //发送进入房间通知消息
+                    io.of(Settings.options.socketNameSpace).in(rId).emit('news',{code:Const.resCodeSucceed,data:param});
+                }
+
             }
-        ]);
+        ],
+            function (err,data) {
+                if(err){
+                    socket.emit('socketerror',{code:Const.resCodeFail});
+                }
+                else{
+                    socket.emit('socketerror',data);
+                }
+            });
 
     });
 
 }
 
 
-module["exports"] = new MessageActionHandler();
+module["exports"] = new RoomActionHandler();

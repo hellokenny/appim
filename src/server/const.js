@@ -9,8 +9,8 @@
     Const.httpCodeSeverError = 500;
     Const.httpCodeAuthError = 503;
 
-    Const.responsecodeFail = -1;
-    Const.responsecodeSucceed = 1;
+    Const.resCodeFail = -1;
+    Const.resCodeSucceed = 1;
     Const.resCodeLoginNoName = 1000001;
     Const.resCodeLoginNoAc = 1000002;
     Const.resCodeLoginNoUserID = 1000003;
@@ -46,8 +46,8 @@
 
     Const.resCodeStickerListFailed = 1000028;
 
-    Const.responsecodeParamError = 2001;
-    Const.responsecodeTokenError = 2100;
+    Const.resCodeParamError = 2001;
+    Const.resCodeTokenError = 2100;
 
     Const.messageTypeText = 1;
     Const.messageTypeFile = 2;

@@ -1,7 +1,7 @@
 //var socketIOManager = require("./libs/socketIOManager");
 
 
-function login() {
+function addRoom() {
     // socketIOManager.init();
     var ac=$("#ac").val();
     var name=$("#name").val();

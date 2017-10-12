@@ -22,8 +22,9 @@ var WebAPIHandler ={
 
         // HTTP Routes
 
-        router.use("/user/login", require('./LoginHandler'));
-        // router.use("/room/add", require('./RoomHandler'));
+        router.use("/user", require('./UserHandler'));
+        router.use("/room", require('./RoomHandler'));
+        router.use("/message", require('./MessageHandler'));
         // router.use("/temp", require('./TempHandler'));
         // router.use("/message/list", require('./MessageListHandler'));
         // router.use("/message/latest", require('./LatestMessageListHandler').router);

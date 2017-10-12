@@ -1,108 +1,83 @@
 var Utils = require("../lib/Utils");
 var Const = require("../const");
 var Settings = require("../lib/Settings");
-var UserModel = require("../Models/UserModel");
 var MessageModel = require("../Models/MessageModel");
+var RoomsManager = require('./RoomsManager');
 var DatabaseManager = require("../lib/DatabaseManager");
 var async = require('async');
 var _ = require('lodash');
+var objectid = require('objectid');
 
-var UserLogic = {
-    login : function(param,onSuccess,onError){
-        var ac = param.ac;
-        var name = param.name;
-        var avatar = param.avatar;
-        var startTime = param.startTime;
+var MessageLogic = {
+    send:function (param,onSuccess,onError) {
+        var rId = param.rId;
+        var uId = param.uId;
+        var msg = param.msg;
+        var type = param.type;
 
-        if(Utils.isEmpty(ac)){
-
+        if(Utils.isEmpty(rId)){
             if(onError)
-                onError(null,Const.resCodeLoginNoAc);
+                onError(null,Const.resCodeParamError);
 
             return;
-
         }
 
-        if(Utils.isEmpty(name)){
-
+        if(Utils.isEmpty(uId)){
             if(onError)
-                onError(null,Const.resCodeLoginNoName);
+                onError(null,Const.resCodeParamError);
 
             return;
-
         }
 
-        if(Utils.isEmpty(avatar)){
-            avatar = Settings.options.noAvatarImg;
+        if(Utils.isEmpty(msg)){
+            if(onError)
+                onError(null,Const.resCodeParamError);
+
+            return;
         }
 
         async.waterfall([
             function (done) {
-                //获取用户信息
-                UserModel.findByAc(ac,function (err,user) {
-                    done(err,user);
-                })
-            },
-            function (user,done) {
-                if(user == null){
-                    // save to database
-                    var newUser = new DatabaseManager.userModel({
-                        ac:ac,
-                        name:name,
-                        avatar:avatar,
-                        createTime:Date.now()
+                //获取房间信息
+                var room = RoomsManager.rooms[rId];
+                if(room!=null){
+                    //保存消息数据
+                    var newMessage = new DatabaseManager.messageModel({
+                        _id:objectid(),
+                        message:msg,
+                        type:type,
+                        senderId:uId,
+                        sendTime:new Date(),
+                        roomId:rId,
+                        targets:room.members,
+                        unreceiveds:room.offlines,
+                        createTime:new Date()
                     });
-                    newUser.save(function (err,user) {
-                        done(err,user);
-                    });
-                }
-                else{
-                    user.update({
-                        name:name,
-                        avatar:avatar
-                    },{},function (err,userResult) {
-                        done(err,user);
+
+                    newMessage.save(function (err,room) {
+                        if(err){
+
+                            console.log("---------------newMessageSave-------------");
+
+                            console.log(err);
+
+                            if(onError)
+                                onError(err,null);
+                        }
+                        else{
+                            if(onSuccess)
+                                onSuccess({
+
+                                });
+                        }
                     })
-                }
-            },
-            function (user,done) {
-                // 获取用户未读消息
-                MessageModel.findUnreceivedByUserId(startTime,user._id,function (err,msgs) {
-                    done(err,user,msgs);
-                });
-            },
-            function (user,msgs) {
-                //更新消息未读用户信息
-                msgs.forEach(function (msg) {
-                    var arr = msg.unreceiveds.slice(0);
-                    _.pull(arr,user._id.toString());
-                    msg.update({
-                        unreceiveds:arr
-                    },{},function (err,data) {
-                        console.log(err);
-                        console.log(data);
-                    });
-                });
 
-                if(onSuccess)
-                    onSuccess({
-                        user: user,
-                        msgs: msgs
-                    });
-            }
 
-        ],
-            function (err,data) {
-                if(err){
-                    socket.emit('socketerror',{code:Const.responsecodeFail});
-                }
-                else{
-                    socket.emit('socketerror',data);
                 }
             }
-        );
+        ]);
 
     }
 }
 
-module["exports"] = UserLogic;
+module["exports"] = MessageLogic;

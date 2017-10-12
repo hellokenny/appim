@@ -26,7 +26,7 @@ RequestHandlerBase.prototype.successResponse = function(response,code,data){
 
     response.status(Const.httpCodeSucceed);
 
-    if(code != Const.responsecodeSucceed){
+    if(code != Const.resCodeSucceed){
 
         response.json({
             code : code
@@ -35,7 +35,7 @@ RequestHandlerBase.prototype.successResponse = function(response,code,data){
     } else {
 
         response.json({
-            code : Const.responsecodeSucceed,
+            code : Const.resCodeSucceed,
             data : data
         });
 

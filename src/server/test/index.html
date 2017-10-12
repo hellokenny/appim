@@ -5,6 +5,7 @@
     <title>Login</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./js/login.js"></script>
+    <script src="./js/room.js"></script>
     <script src="./js/libs/jquery-3.1.1.min.js"></script>
     <script>
 
@@ -12,7 +13,7 @@
         var socket =io('http://10.101.132.67:8989/appim');
 
         function loginTest() {
-//            login();
+            login();
 
             var ac=$("#ac").val();
             var name=$("#name").val();
@@ -20,6 +21,7 @@
 
 
             socket.on('news',function (data) {
+                console.log('socket news');
                 console.log(data);
                 console.log(socket);
             });
@@ -36,7 +38,47 @@
             })
         }
 
-//        socket.on('news',function (data) {
+        function sendmsg() {
+
+            var rId=$("#rId").val();
+            var uId=$("#uId").val();
+            var msg=$("#msg").val();
+            var type=$("#sendType").val();
+
+            socket.emit('sendmsg',{
+                rId:rId,
+                uId:uId,
+                msg:msg,
+                type:type
+            });
+        }
+
+        function logout() {
+
+            var uId=$("#uId").val();
+
+            socket.emit('logout',{
+                uId:uId
+            });
+        }
+
+
+        function addmember() {
+
+            var rId=$("#rId").val();
+            var inviterId=$("#uId").val();
+            var invitedIds=$("#invitedIds").val();
+
+            socket.emit('addmember',{
+                rId:rId,
+                inviterId:inviterId,
+                invitedIds:invitedIds
+            });
+        }
+
+
+
+        //        socket.on('news',function (data) {
 //            console.log(data);
 //            socket.emit('my other event',{my:'data'});
 //        })
@@ -54,6 +96,32 @@
     <label>Avatar:</label>
     <input type="text" name="avatar" id="avatar" >
     <br/>
+    <label>StartTime:</label>
+    <input type="text" name="startTime" id="startTime" >
+    <br/>
     <input type="button" onclick="loginTest()" value="Login">
+    <input type="button" onclick="logout()" value="logout">
+
+    <h3>SendMsg</h3>
+    <label>rId:</label>
+    <input type="text" name="rId" id="rId" value="59ce10ff39934c33f00994fe" >
+    <br/>
+    <label>uId:</label>
+    <input type="text" name="uId" id="uId" value="59c0bcc4eab58e61f8730d6d" >
+    <br/>
+    <label>msg:</label>
+    <input type="text" name="msg" id="msg" value="test">
+    <br/>
+    <label>sendType:</label>
+    <input type="text" name="sendType" id="sendType" value="1" >
+    <br/>
+    <input type="button" onclick="sendmsg()" value="sendmsg">
+
+    <h3>AddMember</h3>
+    <label>invitedIds:</label>
+    <input type="text" name="invitedIds" id="invitedIds" value="59c0c092eab58e61f8730d6e" >
+    <br/>
+    <input type="button" onclick="addmember()" value="addmember">
+
 </body>
 </html>

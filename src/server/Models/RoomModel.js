@@ -22,10 +22,10 @@ RoomModel.prototype.init = function(){
 
 }
 
-RoomModel.prototype.findByUserId = function(uid,callBack){
+RoomModel.prototype.findByUserId = function(uId,callBack){
 
-    this.model.find({ members: uid },function (err, rooms) {
-        // this.model.find({ members: "ObjectId(\"" + uid + "\")" },function (err, rooms) {
+    this.model.find({ members: uId },function (err, rooms) {
+        // this.model.find({ members: "ObjectId(\"" + uId + "\")" },function (err, rooms) {
 
         if (err)
             console.error(err);

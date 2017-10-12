@@ -1,5 +1,7 @@
 var mongoose = require('mongoose');
 var Settings = require("../lib/Settings");
+var Utils = require('../lib/Utils');
+var _ = require('lodash');
 
 var MessageModel = function(){
 
@@ -40,10 +42,10 @@ MessageModel.prototype.init = function(){
 
 }
 
-MessageModel.prototype.findUnreceivedByUerId = function(startTime,uid,callBack){
+MessageModel.prototype.findUnreceivedByUserId = function(startTime,uId,callBack){
 
-    if(startTime != null){
-        this.model.find({unreceiveds: uid ,createTime: {$gt:"ISODate(\"" + startTime + "\")"}},function (err,msgs) {
+    if(Utils.isEmpty(startTime)){
+        this.model.find({unreceiveds: uId },function (err,msgs) {
             if(err)
                 console.error(err);
             if(callBack)
@@ -51,15 +53,17 @@ MessageModel.prototype.findUnreceivedByUerId = function(startTime,uid,callBack){
         });
     }else{
 
-        this.model.find({unreceiveds: uid },function (err,msgs) {
+        this.model.find({unreceiveds: uId ,createTime: {$gt: startTime }},function (err,msgs) {
             if(err)
                 console.error(err);
             if(callBack)
                 callBack(err,msgs);
         });
+
     }
 
 }
+
 
 
 module["exports"] = new MessageModel();

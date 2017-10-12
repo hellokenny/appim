@@ -5,6 +5,7 @@ var UserModel = require("../Models/UserModel");
 var MessageModel = require("../Models/MessageModel");
 var DatabaseManager = require("../lib/DatabaseManager");
 var async = require('async');
+var _ = require('lodash');
 
 var UserLogic = {
     login : function(param,onSuccess,onError){
@@ -49,7 +50,7 @@ var UserLogic = {
                         ac:ac,
                         name:name,
                         avatar:avatar,
-                        createTime:Date.now()
+                        createTime:new Date()
                     });
                     newUser.save(function (err,user) {
                         done(err,user);
@@ -66,7 +67,7 @@ var UserLogic = {
             },
             function (user,done) {
                 // 获取用户未读消息
-                MessageModel.findUnreceivedByUerId(startTime,user._id,function (err,msgs) {
+                MessageModel.findUnreceivedByUserId(startTime,user._id,function (err,msgs) {
                     done(err,user,msgs);
                 });
             },
@@ -76,7 +77,10 @@ var UserLogic = {
                     var arr = msg.unreceiveds.slice(0);
                     _.pull(arr,user._id.toString());
                     msg.update({
-                        unreceiveds : arr
+                        unreceiveds:arr
+                    },{},function (err,data) {
+                        console.log(err);
+                        console.log(data);
                     });
                 });
 
@@ -90,7 +94,7 @@ var UserLogic = {
         ],
             function (err,data) {
                 if(err){
-                    socket.emit('socketerror',{code:Const.responsecodeFail});
+                    socket.emit('socketerror',{code:Const.resCodeFail});
                 }
                 else{
                     socket.emit('socketerror',data);
